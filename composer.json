@@ -1,0 +1,30 @@
+{
+    "name": "larsnieuwenhuizen/clubhouse-connector",
+    "description": "Service package to connect and interface with Clubhouse through php",
+    "minimum-stability": "stable",
+    "license": "LGPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Lars Nieuwenhuizen",
+            "email": "lars.nieuwenhuizen@me.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "LarsNieuwenhuizen\\ClubhouseConnector\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LarsNieuwenhuizen\\ClubhouseConnector\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": ">=7.4",
+        "guzzlehttp/guzzle": "^6.5",
+        "symfony/yaml": "^5.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9"
+    }
+}

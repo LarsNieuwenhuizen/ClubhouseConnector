@@ -1,0 +1,6 @@
+---
+
+Clubhouse:
+  api:
+    host: 'https://dummyhost'
+    token: 'dummyToken'
