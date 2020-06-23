@@ -27,7 +27,7 @@ class ConnectorTest extends TestCase
     public function testExceptionIsThrownWhenApiHostIsMissingInConfiguration(): void
     {
         $this->expectException(ConnectorConstructionException::class);
-        $this->expectExceptionMessage('The api host is not set');
+        $this->expectExceptionMessage('The api uri is not set');
         new Connector(__DIR__ . '/DummyConfigFiles/MissingHostConfig.yaml');
     }
 

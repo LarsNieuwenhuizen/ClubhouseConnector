@@ -1,4 +1,4 @@
 ---
 Clubhouse:
   api:
-    host: 'https://dummyhost'
+    uri: 'https://dummyhost'
