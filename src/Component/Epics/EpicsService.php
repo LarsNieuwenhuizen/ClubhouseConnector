@@ -28,7 +28,7 @@ final class EpicsService extends AbstractComponentService
 
     public function list(): ComponentResponseBody
     {
-        $call = $this->getClient()->get($this->getApiPath());
+        $call = $this->getClient()->request('get', $this->getApiPath());
         return (
             new ListEpicsResponse($call->getBody()->getContents())
         )->getBody();
