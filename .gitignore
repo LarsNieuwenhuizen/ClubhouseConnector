@@ -4,3 +4,4 @@ vendor
 .phpunit.result.cache
 composer.lock
 dummy.php
+.phpunit.result.cache

@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 namespace LarsNieuwenhuizen\ClubhouseConnector\Tests\Unit;
 
+use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentService;
 use LarsNieuwenhuizen\ClubhouseConnector\Connector;
 use LarsNieuwenhuizen\ClubhouseConnector\Exception\Connector\ConnectorConstructionException;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 class ConnectorTest extends TestCase
 {
@@ -36,5 +38,15 @@ class ConnectorTest extends TestCase
         $this->expectException(ConnectorConstructionException::class);
         $this->expectExceptionMessage('The api token is not set');
         new Connector(__DIR__ . '/DummyConfigFiles/MissingTokenConfig.yaml');
+    }
+
+    public function testThatLoggerIsAlwaysAvailable(): void
+    {
+        $this->assertInstanceOf(LoggerInterface::class, $this->subject->getLogger());
+    }
+
+    public function testEpicsServiceIsAvailable(): void
+    {
+        $this->assertInstanceOf(ComponentService::class, $this->subject->getEpicsService());
     }
 }

@@ -1,0 +1,11 @@
+language: php
+php:
+  - 7.4
+before_install:
+  - composer install
+script:
+  - vendor/bin/phpunit --stop-on-failure -c phpunit.xml --coverage-clover build/logs/clover.xml
+  - vendor/bin/test-reporter
+cache:
+  directories:
+    - vendor
