@@ -6,41 +6,72 @@ namespace LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Domain\Model;
 use DateTime;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentResponseBody;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\CreateableComponent;
+use Psr\Log\LoggerInterface;
 
 final class Epic implements ComponentResponseBody, CreateableComponent
 {
 
     private string $appUrl;
+
     private bool $archived;
+
     private bool $completed;
+
     private ?DateTime $completedAt = null;
+
     private ?DateTime $completedAtOverride = null;
+
     private DateTime $createdAt;
+
     private ?DateTime $deadline;
+
     private string $description;
+
     private string $entityType;
+
     private ?int $epicStateId = null;
+
     private ?string $externalId = null;
+
     private array $externalTickets = [];
+
     private array $followerIds = [];
+
     private array $groupMentionIds = [];
+
     private int $id;
+
     private array $labels = [];
+
     private array $memberMentionIds = [];
+
     private array $mentionIds = [];
+
     private ?int $milestoneId = null;
+
     private string $name;
+
     private array $ownerIds = [];
+
     private ?DateTime $plannedStartDate = null;
+
     private ?int $position;
+
     private array $projectIds = [];
+
     private string $requestedById;
+
     private bool $started;
+
     private ?DateTime $startedAt = null;
+
     private ?DateTime $startedAtOverride = null;
+
     private string $state;
+
     private array $stats = [];
-    private ?DateTime $updated = null;
+
+    private ?DateTime $updatedAt = null;
 
     public static function createFromResponseData(array $values): Epic
     {
@@ -49,14 +80,23 @@ final class Epic implements ComponentResponseBody, CreateableComponent
         $object->archived = $values['archived'];
         $object->completed = $values['completed'];
         if (isset($values['completed_at']) && $values['completed_at'] !== null) {
-            $object->completedAt = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', (string)$values['completed_at']);
+            $object->completedAt = DateTime::createFromFormat(
+                'Y-m-d\TH:i:s\Z',
+                $values['completed_at']
+            );
         }
         if (isset($values['completed_at_override']) && $values['completed_at_override'] !== null) {
-            $object->completedAtOverride = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', (string)$values['completed_at_override']);
+            $object->completedAtOverride = DateTime::createFromFormat(
+                'Y-m-d\TH:i:s\Z',
+                $values['completed_at_override']
+            );
         }
         $object->createdAt = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', (string)$values['created_at']);
         if (isset($values['deadline']) && $values['deadline'] !== null) {
-            $object->deadline = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', (string)$values['deadline']);
+            $object->deadline = DateTime::createFromFormat(
+                'Y-m-d\TH:i:s\Z',
+                $values['deadline']
+            );
         }
         $object->description = $values['description'] ?? '';
         $object->entityType = $values['entity_type'] ?? '';
@@ -73,24 +113,40 @@ final class Epic implements ComponentResponseBody, CreateableComponent
         $object->name = $values['name'];
         $object->ownerIds = $values['owner_ids'] ?? [];
         if (isset($values['planned_start_date']) && $values['planned_start_date'] !== null) {
-            $object->plannedStartDate = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', (string)$values['planned_start_date']);
+            $object->plannedStartDate = DateTime::createFromFormat(
+                'Y-m-d\TH:i:s\Z',
+                $values['planned_start_date']
+            );
         }
         $object->position = $values['position'] ?? null;
         $object->projectIds = $values['project_ids'] ?? [];
         $object->requestedById = $values['requested_by_id'];
         $object->started = $values['started'];
         if (isset($values['started_at']) && $values['started_at'] !== null) {
-            $object->startedAt = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', (string)$values['started_at']);
+            $object->startedAt = DateTime::createFromFormat(
+                'Y-m-d\TH:i:s\Z',
+                $values['started_at']
+            );
         }
         if (isset($values['started_at_override']) && $values['started_at_override'] !== null) {
-            $object->startedAtOverride = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', (string)$values['started_at_override']);
+            $object->startedAtOverride = DateTime::createFromFormat(
+                'Y-m-d\TH:i:s\Z',
+                $values['started_at_override']
+            );
         }
         $object->state = $values['state'];
         $object->stats = $values['stats'] ?? [];
-        if (isset($values['updated']) && $values['updated'] !== null) {
-            $object->updated = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', (string)$values['updated']);;
+        if (isset($values['updated_at']) && $values['updated_at'] !== null) {
+            $object->updatedAt = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', (string)$values['updated_at']);;
         }
         return $object;
+    }
+
+    public function toJsonForCreation(): string
+    {
+        return \json_encode([
+            'name' => $this->getName()
+        ]);
     }
 
     public function getAppUrl(): string
@@ -243,9 +299,9 @@ final class Epic implements ComponentResponseBody, CreateableComponent
         return $this->stats;
     }
 
-    public function getUpdated(): ?DateTime
+    public function getUpdatedAt(): ?DateTime
     {
-        return $this->updated;
+        return $this->updatedAt;
     }
 
     public function setCompletedAtOverride(?DateTime $completedAtOverride): Epic
@@ -336,12 +392,5 @@ final class Epic implements ComponentResponseBody, CreateableComponent
     {
         $this->updated = $updated;
         return $this;
-    }
-
-    public function toJsonForCreation(): string
-    {
-        return \json_encode([
-            'name' => $this->getName()
-        ]);
     }
 }

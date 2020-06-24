@@ -5,6 +5,7 @@ namespace LarsNieuwenhuizen\ClubhouseConnector\Component\Epics;
 
 use GuzzleHttp\Exception\ClientException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\AbstractComponentService;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentCreationException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentResponseBody;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\CreateableComponent;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Domain\Model\Epic;
@@ -36,14 +37,16 @@ final class EpicsService extends AbstractComponentService
     public function create(CreateableComponent $epic): ComponentResponseBody
     {
         if (!$epic instanceof Epic) {
-            throw new \Exception('You trying to create the wrong object here');
+            $message = 'The object you are trying to create of type ' . \get_class($epic) . ' is not an epic.';
+            $this->getLogger()->error($message);
+            throw new ComponentCreationException($message);
         }
 
         try {
             $call = $this->getClient()->post(
                 $this->getApiPath(),
                 [
-//                'body' => $epic->toJsonForCreation()
+                    'body' => $epic->toJsonForCreation()
                 ]
             );
 
