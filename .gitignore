@@ -5,3 +5,4 @@ vendor
 composer.lock
 dummy.php
 .phpunit.result.cache
+configuration

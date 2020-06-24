@@ -1,6 +1,0 @@
----
-
-Clubhouse:
-  api:
-    uri: 'https://api.clubhouse.io/api/v3/'
-    token: '5eecb827-48c2-40bd-aa3c-417c2af74e74'
