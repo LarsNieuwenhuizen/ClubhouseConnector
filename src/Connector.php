@@ -14,6 +14,8 @@ use Symfony\Component\Yaml\Yaml;
 final class Connector
 {
 
+    const DATE_TIME_FORMAT = 'Y-m-d\TH:i:s\Z';
+
     private Client $httpClient;
     private array $configuration = [];
     private ComponentService $epicsService;

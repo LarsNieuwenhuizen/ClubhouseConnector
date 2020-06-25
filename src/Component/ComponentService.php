@@ -18,5 +18,5 @@ interface ComponentService
 
     public function delete(): ComponentResponseBody;
 
-    public function update(): ComponentResponseBody;
+    public function update(UpdateableComponent $component): ComponentResponseBody;
 }

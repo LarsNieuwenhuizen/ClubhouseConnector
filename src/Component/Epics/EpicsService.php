@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace LarsNieuwenhuizen\ClubhouseConnector\Component\Epics;
 
-use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\AbstractComponentService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentCreationException;
@@ -12,7 +11,9 @@ use LarsNieuwenhuizen\ClubhouseConnector\Component\CreateableComponent;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Domain\Model\Epic;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Http\GetEpicResponse;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Http\ListEpicsResponse;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentUpdateException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ServiceCallException;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\UpdateableComponent;
 
 final class EpicsService extends AbstractComponentService
 {
@@ -110,8 +111,42 @@ final class EpicsService extends AbstractComponentService
         // TODO: Implement delete() method.
     }
 
-    public function update(): ComponentResponseBody
+    /**
+     * @param UpdateableComponent $epic
+     * @return ComponentResponseBody
+     * @throws ComponentUpdateException
+     */
+    public function update(UpdateableComponent $epic): ComponentResponseBody
     {
-        // TODO: Implement update() method.
+        if (!$epic instanceof Epic) {
+            $message = 'The object you are trying to update of type ' . \get_class($epic) . ' is not an epic.';
+            $this->getLogger()->error($message);
+            throw new ComponentUpdateException($message);
+        }
+
+        try {
+            $call = $this->getClient()->put(
+                $this->getApiPath() . '/' . $epic->getId(),
+                [
+                    'body' => $epic->toJsonForUpdate()
+                ]
+            );
+        } catch (GuzzleException $guzzleException) {
+            $this->getLogger()->error(
+                'Updating epic with id: ' . $epic->getId() . ' failed',
+                [
+                    'message' => $guzzleException->getMessage()
+                ]
+            );
+            throw new ComponentUpdateException(
+                'Updating epic with id: ' . $epic->getId() . ' failed',
+                $guzzleException->getCode(),
+                $guzzleException
+            );
+        }
+
+        return (
+            new GetEpicResponse($call->getBody()->getContents())
+        )->getBody();
     }
 }

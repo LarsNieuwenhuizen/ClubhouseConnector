@@ -4,16 +4,18 @@ declare(strict_types = 1);
 namespace LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Domain\Model;
 
 use DateTime;
+use DateTimeZone;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentResponseBody;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\CreateableComponent;
-use Psr\Log\LoggerInterface;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\UpdateableComponent;
+use LarsNieuwenhuizen\ClubhouseConnector\Connector;
 
-final class Epic implements ComponentResponseBody, CreateableComponent
+final class Epic implements ComponentResponseBody, CreateableComponent, UpdateableComponent
 {
 
     private string $appUrl;
 
-    private bool $archived;
+    private bool $archived = false;
 
     private bool $completed;
 
@@ -23,9 +25,9 @@ final class Epic implements ComponentResponseBody, CreateableComponent
 
     private DateTime $createdAt;
 
-    private ?DateTime $deadline;
+    private ?DateTime $deadline = null;
 
-    private string $description;
+    private string $description = '';
 
     private string $entityType;
 
@@ -59,7 +61,7 @@ final class Epic implements ComponentResponseBody, CreateableComponent
 
     private array $projectIds = [];
 
-    private string $requestedById;
+    private ?string $requestedById = null;
 
     private bool $started;
 
@@ -67,11 +69,22 @@ final class Epic implements ComponentResponseBody, CreateableComponent
 
     private ?DateTime $startedAtOverride = null;
 
-    private string $state;
+    private string $state = '';
 
     private array $stats = [];
 
     private ?DateTime $updatedAt = null;
+
+    private ?int $beforeEpic = null;
+
+    private ?int $afterEpic = null;
+
+    private DateTimeZone $defaultDateTimeZone;
+
+    public function __construct()
+    {
+        $this->defaultDateTimeZone = new DateTimeZone('Europe/Amsterdam');
+    }
 
     public static function createFromResponseData(array $values): Epic
     {
@@ -81,21 +94,28 @@ final class Epic implements ComponentResponseBody, CreateableComponent
         $object->completed = $values['completed'];
         if (isset($values['completed_at']) && $values['completed_at'] !== null) {
             $object->completedAt = DateTime::createFromFormat(
-                'Y-m-d\TH:i:s\Z',
-                $values['completed_at']
+                Connector::DATE_TIME_FORMAT,
+                $values['completed_at'],
+                $object->defaultDateTimeZone
             );
         }
         if (isset($values['completed_at_override']) && $values['completed_at_override'] !== null) {
             $object->completedAtOverride = DateTime::createFromFormat(
-                'Y-m-d\TH:i:s\Z',
-                $values['completed_at_override']
+                Connector::DATE_TIME_FORMAT,
+                $values['completed_at_override'],
+                $object->defaultDateTimeZone
             );
         }
-        $object->createdAt = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', (string)$values['created_at']);
+        $object->createdAt = DateTime::createFromFormat(
+            Connector::DATE_TIME_FORMAT,
+            $values['created_at'],
+            $object->defaultDateTimeZone
+        );
         if (isset($values['deadline']) && $values['deadline'] !== null) {
             $object->deadline = DateTime::createFromFormat(
-                'Y-m-d\TH:i:s\Z',
-                $values['deadline']
+                Connector::DATE_TIME_FORMAT,
+                $values['deadline'],
+                $object->defaultDateTimeZone
             );
         }
         $object->description = $values['description'] ?? '';
@@ -114,8 +134,9 @@ final class Epic implements ComponentResponseBody, CreateableComponent
         $object->ownerIds = $values['owner_ids'] ?? [];
         if (isset($values['planned_start_date']) && $values['planned_start_date'] !== null) {
             $object->plannedStartDate = DateTime::createFromFormat(
-                'Y-m-d\TH:i:s\Z',
-                $values['planned_start_date']
+                Connector::DATE_TIME_FORMAT,
+                $values['planned_start_date'],
+                $object->defaultDateTimeZone
             );
         }
         $object->position = $values['position'] ?? null;
@@ -124,20 +145,26 @@ final class Epic implements ComponentResponseBody, CreateableComponent
         $object->started = $values['started'];
         if (isset($values['started_at']) && $values['started_at'] !== null) {
             $object->startedAt = DateTime::createFromFormat(
-                'Y-m-d\TH:i:s\Z',
-                $values['started_at']
+                Connector::DATE_TIME_FORMAT,
+                $values['started_at'],
+                $object->defaultDateTimeZone
             );
         }
         if (isset($values['started_at_override']) && $values['started_at_override'] !== null) {
             $object->startedAtOverride = DateTime::createFromFormat(
-                'Y-m-d\TH:i:s\Z',
-                $values['started_at_override']
+                Connector::DATE_TIME_FORMAT,
+                $values['started_at_override'],
+                $object->defaultDateTimeZone
             );
         }
         $object->state = $values['state'];
         $object->stats = $values['stats'] ?? [];
         if (isset($values['updated_at']) && $values['updated_at'] !== null) {
-            $object->updatedAt = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', (string)$values['updated_at']);;
+            $object->updatedAt = DateTime::createFromFormat(
+                Connector::DATE_TIME_FORMAT,
+                $values['updated_at'],
+                $object->defaultDateTimeZone
+            );;
         }
         return $object;
     }
@@ -147,6 +174,98 @@ final class Epic implements ComponentResponseBody, CreateableComponent
         return \json_encode([
             'name' => $this->getName()
         ]);
+    }
+
+    public function toJsonForUpdate(): string
+    {
+        $data = [
+            'name' => $this->getName(),
+            'archived' => $this->getArchived(),
+            'completed_at_override' => null,
+            'deadline' => null,
+            'description' => $this->getDescription(),
+            'follower_ids' => $this->getFollowerIds(),
+            'labels' => $this->getLabels(),
+            'milestone_id' => $this->getMilestoneId(),
+            'owner_ids' => $this->getOwnerIds(),
+            'planned_start_date' => null,
+            'started_at_override' => null
+        ];
+
+        if ($this->getAfterEpic() !== null) {
+            $data['after_id'] = $this->getAfterEpic();
+        }
+        if ($this->getEpicStateId() !== null) {
+            $data['epic_state_id'] = $this->getEpicStateId();
+        }
+        if ($this->getBeforeEpic() !== null) {
+            $data['before_id'] = $this->getBeforeEpic();
+        }
+        if ($this->getRequestedById() !== null) {
+            $data['requested_by_id'] = $this->getRequestedById();
+        }
+        if ($this->getState() !== null) {
+            $data['state'] = $this->getState();
+        }
+        if ($this->getCompletedAtOverride() instanceof DateTime) {
+            $data['completed_at_override'] = $this->getCompletedAtOverride()->format(Connector::DATE_TIME_FORMAT);
+        }
+        if ($this->getDeadline() instanceof DateTime) {
+            $data['deadline'] = $this->getDeadline()->format(Connector::DATE_TIME_FORMAT);
+        }
+        if ($this->getPlannedStartDate() instanceof DateTime) {
+            $data['planned_start_date'] = $this->getPlannedStartDate()->format(Connector::DATE_TIME_FORMAT);
+        }
+        if ($this->getStartedAtOverride() instanceof DateTime) {
+            $data['started_at_override'] = $this->getStartedAtOverride()->format(Connector::DATE_TIME_FORMAT);
+        }
+
+        return \json_encode($data);
+    }
+
+    public function getBeforeEpic(): ?int
+    {
+        return $this->beforeEpic;
+    }
+
+    /**
+     * @param int $beforeEpic
+     * @return Epic
+     */
+    public function setBeforeEpic(int $beforeEpic): Epic
+    {
+        $this->beforeEpic = $beforeEpic;
+        return $this;
+    }
+
+    public function getAfterEpic(): ?int
+    {
+        return $this->afterEpic;
+    }
+
+    /**
+     * @param int $afterEpic
+     * @return Epic
+     */
+    public function setAfterEpic(int $afterEpic): Epic
+    {
+        $this->afterEpic = $afterEpic;
+        return $this;
+    }
+
+    public function getDefaultDateTimeZone()
+    {
+        return $this->defaultDateTimeZone;
+    }
+
+    /**
+     * @param DateTimeZone $defaultDateTimeZone
+     * @return Epic
+     */
+    public function setDefaultDateTimeZone(DateTimeZone $defaultDateTimeZone): Epic
+    {
+        $this->defaultDateTimeZone = $defaultDateTimeZone;
+        return $this;
     }
 
     public function getAppUrl(): string
@@ -194,7 +313,7 @@ final class Epic implements ComponentResponseBody, CreateableComponent
         return $this->entityType;
     }
 
-    public function getEpicStateId(): int
+    public function getEpicStateId(): ?int
     {
         return $this->epicStateId;
     }
@@ -239,9 +358,9 @@ final class Epic implements ComponentResponseBody, CreateableComponent
         return $this->mentionIds;
     }
 
-    public function getMilestoneId(): int
+    public function getMilestoneId(): ?int
     {
-        return $this->milestoneId;
+        return $this->milestoneId ?? null;
     }
 
     public function getName(): string
@@ -269,7 +388,7 @@ final class Epic implements ComponentResponseBody, CreateableComponent
         return $this->projectIds;
     }
 
-    public function getRequestedById(): string
+    public function getRequestedById(): ?string
     {
         return $this->requestedById;
     }

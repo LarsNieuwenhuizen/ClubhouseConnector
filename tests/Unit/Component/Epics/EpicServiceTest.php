@@ -337,4 +337,31 @@ final class EpicServiceTest extends TestCase
         $this->expectException(ServiceCallException::class);
         $this->subject->create($epic);
     }
+
+    public function testEpicIsReturnedAfterSuccessfulUpdate(): void
+    {
+        $epic = Epic::createFromResponseData(\json_decode($this->exampleGetResponse, true))
+            ->setDeadline(new \DateTime('now'))
+            ->setStartedAtOverride(new \DateTime('now'))
+            ->setCompletedAtOverride(new \DateTime('now'))
+            ->setPlannedStartDate(new \DateTime('now'))
+            ->setBeforeEpic(1)
+            ->setAfterEpic(2);
+
+        $this->streamMock->expects($this->once())
+            ->method('getContents')
+            ->willReturn($this->exampleGetResponse);
+
+        $this->responseMock->expects($this->once())
+            ->method('getBody')
+            ->willReturn($this->streamMock);
+
+        $this->clientMock->expects($this->once())
+            ->method('put')
+            ->with('epics/123', ['body' => $epic->toJsonForUpdate()])
+            ->willReturn($this->responseMock);
+
+        $result = $this->subject->update($epic);
+        $this->assertInstanceOf(Epic::class, $result);
+    }
 }
