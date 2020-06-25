@@ -33,7 +33,10 @@ final class EpicServiceTest extends TestCase
     protected function setUp(): void
     {
         $this->loggerMock = $this->createMock(NullLogger::class);
-        $this->clientMock = $this->createMock(Client::class);
+        $this->clientMock = $this->getMockBuilder(Client::class)
+            ->addMethods(['get', 'post', 'put', 'delete'])
+            ->onlyMethods(['request'])
+            ->getMock();
         $this->responseMock = $this->createMock(Response::class);
         $this->streamMock = $this->createMock(Stream::class);
         $this->subject = new EpicsService($this->clientMock, $this->loggerMock);
@@ -228,8 +231,8 @@ final class EpicServiceTest extends TestCase
             ->willReturn($this->streamMock);
 
         $this->clientMock->expects($this->once())
-            ->method('request')
-            ->with('get', 'epics')
+            ->method('get')
+            ->with('epics')
             ->willReturnReference($this->responseMock);
 
         $result = $this->subject->list();
@@ -243,8 +246,8 @@ final class EpicServiceTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('error');
         $this->clientMock->expects($this->once())
-            ->method('request')
-            ->with('get', 'epics')
+            ->method('get')
+            ->with('epics')
             ->willThrowException($guzzleException);
 
         $this->expectException(ServiceCallException::class);
@@ -262,8 +265,8 @@ final class EpicServiceTest extends TestCase
             ->willReturn($this->streamMock);
 
         $this->clientMock->expects($this->once())
-            ->method('request')
-            ->with('get', 'epics/1')
+            ->method('get')
+            ->with('epics/1')
             ->willReturnReference($this->responseMock);
 
         $result = $this->subject->get('1');
@@ -277,8 +280,8 @@ final class EpicServiceTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('error');
         $this->clientMock->expects($this->once())
-            ->method('request')
-            ->with('get', 'epics/1')
+            ->method('get')
+            ->with('epics/1')
             ->willThrowException($guzzleException);
 
         $this->expectException(ServiceCallException::class);
@@ -309,8 +312,8 @@ final class EpicServiceTest extends TestCase
             ->willReturn($this->streamMock);
 
         $this->clientMock->expects($this->once())
-            ->method('request')
-            ->with('post', 'epics', ['body' => $epic->toJsonForCreation()])
+            ->method('post')
+            ->with('epics', ['body' => $epic->toJsonForCreation()])
             ->willReturn($this->responseMock);
 
         $result = $this->subject->create($epic);
@@ -327,8 +330,8 @@ final class EpicServiceTest extends TestCase
             ->method('error');
 
         $this->clientMock->expects($this->once())
-            ->method('request')
-            ->with('post', 'epics', ['body' => $epic->toJsonForCreation()])
+            ->method('post')
+            ->with('epics', ['body' => $epic->toJsonForCreation()])
             ->willThrowException($guzzleException);
 
         $this->expectException(ServiceCallException::class);

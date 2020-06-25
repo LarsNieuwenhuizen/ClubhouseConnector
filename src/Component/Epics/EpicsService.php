@@ -28,7 +28,7 @@ final class EpicsService extends AbstractComponentService
     {
         try {
             $path = $this->getApiPath() . '/' . $identifier;
-            $call = $this->getClient()->request('get', $path);
+            $call = $this->getClient()->get($path);
         } catch (GuzzleException $exception) {
             $this->logger->error(
                 'Fetching single epic with id: ' . $identifier . ' failed.',
@@ -50,7 +50,7 @@ final class EpicsService extends AbstractComponentService
     public function list(): ComponentResponseBody
     {
         try {
-            $call = $this->getClient()->request('get', $this->getApiPath());
+            $call = $this->getClient()->get($this->getApiPath());
         } catch (GuzzleException $exception) {
             $this->logger->error(
                 'Listing Epics failed',
@@ -80,8 +80,7 @@ final class EpicsService extends AbstractComponentService
         }
 
         try {
-            $call = $this->getClient()->request(
-                'post',
+            $call = $this->getClient()->post(
                 $this->getApiPath(),
                 [
                     'body' => $epic->toJsonForCreation()
