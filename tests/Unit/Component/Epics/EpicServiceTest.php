@@ -5,7 +5,6 @@ namespace LarsNieuwenhuizen\ClubhouseConnector\Tests\Unit\Component\Epics;
 
 use Guzzle\Common\Exception\RuntimeException;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Stream;
@@ -17,6 +16,7 @@ use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentCreationEx
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentDeleteException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentUpdateException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ServiceCallException;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\Domain\Model\Milestone;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
@@ -293,12 +293,22 @@ final class EpicServiceTest extends TestCase
 
     public function testOnlyEpicsCanBeMadeInCreate(): void
     {
-//        $this->expectException(ComponentCreationException::class);
-//        $differentCreatableComponentObject = '';
-        // TODO: Create this test when we have more than one creatableComponent :)
+        $this->expectException(ComponentCreationException::class);
+        $differentCreatableComponentObject = new Milestone();
+        $this->loggerMock->expects($this->once())
+            ->method('error');
 
+        $this->subject->create($differentCreatableComponentObject);
+    }
 
-        $this->assertTrue(true);
+    public function testOnlyEpicsCanBeUpdatedInUpdate(): void
+    {
+        $this->expectException(ComponentUpdateException::class);
+        $differentCreatableComponentObject = new Milestone();
+        $this->loggerMock->expects($this->once())
+            ->method('error');
+
+        $this->subject->update($differentCreatableComponentObject);
     }
 
     public function testEpicIsReturnedAfterSuccessfulCreation(): void

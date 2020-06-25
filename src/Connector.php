@@ -6,6 +6,7 @@ namespace LarsNieuwenhuizen\ClubhouseConnector;
 use GuzzleHttp\Client;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\EpicsService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentService;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\MilestonesService;
 use LarsNieuwenhuizen\ClubhouseConnector\Exception\Connector\ConnectorConstructionException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -19,6 +20,7 @@ final class Connector
     private Client $httpClient;
     private array $configuration = [];
     private ComponentService $epicsService;
+    private ComponentService $milestonesService;
     private LoggerInterface $logger;
 
     public function __construct(string $configurationFilePath, LoggerInterface $logger = null)
@@ -41,6 +43,7 @@ final class Connector
             $this->setHttpClient($httpClient);
 
             $this->epicsService = new EpicsService($this->getHttpClient(), $this->getLogger());
+            $this->milestonesService = new MilestonesService($this->getHttpClient(), $this->getLogger());
         } catch (ConnectorConstructionException $connectorConstructionException) {
             $this->getLogger()->error($connectorConstructionException->getMessage());
             throw $connectorConstructionException;
@@ -92,5 +95,10 @@ final class Connector
     public function getEpicsService(): ComponentService
     {
         return $this->epicsService;
+    }
+
+    public function getMilestonesService(): ComponentService
+    {
+        return $this->milestonesService;
     }
 }
