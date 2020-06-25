@@ -14,71 +14,38 @@ final class Epic implements ComponentResponseBody, CreateableComponent, Updateab
 {
 
     private string $appUrl;
-
     private bool $archived = false;
-
     private bool $completed;
-
     private ?DateTime $completedAt = null;
-
     private ?DateTime $completedAtOverride = null;
-
     private DateTime $createdAt;
-
     private ?DateTime $deadline = null;
-
     private string $description = '';
-
     private string $entityType;
-
     private ?int $epicStateId = null;
-
-    private ?string $externalId = null;
-
+    private string $externalId = '';
     private array $externalTickets = [];
-
     private array $followerIds = [];
-
     private array $groupMentionIds = [];
-
     private int $id;
-
     private array $labels = [];
-
     private array $memberMentionIds = [];
-
     private array $mentionIds = [];
-
     private ?int $milestoneId = null;
-
     private string $name;
-
     private array $ownerIds = [];
-
     private ?DateTime $plannedStartDate = null;
-
     private ?int $position;
-
     private array $projectIds = [];
-
     private ?string $requestedById = null;
-
     private bool $started;
-
     private ?DateTime $startedAt = null;
-
     private ?DateTime $startedAtOverride = null;
-
-    private string $state = '';
-
+    private string $state = 'to do';
     private array $stats = [];
-
     private ?DateTime $updatedAt = null;
-
     private ?int $beforeEpic = null;
-
     private ?int $afterEpic = null;
-
     private DateTimeZone $defaultDateTimeZone;
 
     public function __construct()
@@ -121,7 +88,7 @@ final class Epic implements ComponentResponseBody, CreateableComponent, Updateab
         $object->description = $values['description'] ?? '';
         $object->entityType = $values['entity_type'] ?? '';
         $object->epicStateId = $values['epic_state_id'] ?? null;
-        $object->externalId = $values['external_id'] ?? null;
+        $object->externalId = $values['external_id'] ?? '';
         $object->externalTickets = $values['external_tickets'] ?? [];
         $object->followerIds = $values['follower_ids'] ?? [];
         $object->groupMentionIds = $values['group_mention_ids'] ?? [];
@@ -171,9 +138,44 @@ final class Epic implements ComponentResponseBody, CreateableComponent, Updateab
 
     public function toJsonForCreation(): string
     {
-        return \json_encode([
-            'name' => $this->getName()
-        ]);
+        $data = [
+            'name' => $this->getName(),
+            'deadline' => null,
+            'description' => $this->getDescription(),
+            'external_id' => $this->getExternalId(),
+            'follower_ids' => $this->getFollowerIds(),
+            'labels' => $this->getLabels(),
+            'milestone_id' => $this->getMilestoneId(),
+            'owner_ids' => $this->getOwnerIds(),
+            'planned_start_date' => null
+        ];
+
+        if ($this->getRequestedById() !== null) {
+            $data['requested_by_id'] = $this->getRequestedById();
+        }
+        if ($this->getEpicStateId() !== null) {
+            $data['epic_state_id'] = $this->getEpicStateId();
+        }
+        if ($this->getCompletedAtOverride() !== null) {
+            $data['completed_at_override'] = $this->getCompletedAtOverride()->format(Connector::DATE_TIME_FORMAT);
+        }
+        if ($this->getDeadline() !== null) {
+            $data['deadline'] = $this->getDeadline()->format(Connector::DATE_TIME_FORMAT);
+        }
+        if ($this->getPlannedStartDate() !== null) {
+            $data['planned_start_date'] = $this->getPlannedStartDate()->format(Connector::DATE_TIME_FORMAT);
+        }
+        if ($this->getStartedAtOverride() !== null) {
+            $data['started_at_override'] = $this->getStartedAtOverride()->format(Connector::DATE_TIME_FORMAT);
+        }
+        if ($this->getUpdatedAt() !== null) {
+            $data['updated_at'] = $this->getUpdatedAt()->format(Connector::DATE_TIME_FORMAT);
+        }
+        if ($this->getState() !== null) {
+            $data['state'] = $this->getState();
+        }
+
+        return \json_encode($data);
     }
 
     public function toJsonForUpdate(): string
@@ -243,10 +245,6 @@ final class Epic implements ComponentResponseBody, CreateableComponent, Updateab
         return $this->afterEpic;
     }
 
-    /**
-     * @param int $afterEpic
-     * @return Epic
-     */
     public function setAfterEpic(int $afterEpic): Epic
     {
         $this->afterEpic = $afterEpic;
@@ -258,10 +256,6 @@ final class Epic implements ComponentResponseBody, CreateableComponent, Updateab
         return $this->defaultDateTimeZone;
     }
 
-    /**
-     * @param DateTimeZone $defaultDateTimeZone
-     * @return Epic
-     */
     public function setDefaultDateTimeZone(DateTimeZone $defaultDateTimeZone): Epic
     {
         $this->defaultDateTimeZone = $defaultDateTimeZone;
@@ -423,6 +417,12 @@ final class Epic implements ComponentResponseBody, CreateableComponent, Updateab
         return $this->updatedAt;
     }
 
+    public function setUpdatedAt(DateTime $updatedAt): Epic
+    {
+        $this->updatedAt = $updatedAt;
+        return $this;
+    }
+
     public function setCompletedAtOverride(?DateTime $completedAtOverride): Epic
     {
         $this->completedAtOverride = $completedAtOverride;
@@ -504,12 +504,6 @@ final class Epic implements ComponentResponseBody, CreateableComponent, Updateab
     public function setStartedAtOverride(?DateTime $startedAtOverride): Epic
     {
         $this->startedAtOverride = $startedAtOverride;
-        return $this;
-    }
-
-    public function setUpdated(?DateTime $updated): Epic
-    {
-        $this->updated = $updated;
         return $this;
     }
 }

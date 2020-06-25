@@ -322,8 +322,12 @@ final class EpicServiceTest extends TestCase
 
     public function testGuzzleCallFailureIsLoggedAndThrownBackDuringCreate(): void
     {
-        $epic = new Epic();
-        $epic->setName('dummy');
+        $epic = (new Epic())->setName('dummy')
+            ->setDeadline(new \DateTime('now'))
+            ->setCompletedAtOverride(new \DateTime('now'))
+            ->setPlannedStartDate(new \DateTime('now'))
+            ->setStartedAtOverride(new \DateTime('now'))
+            ->setUpdatedAt(new \DateTime('now'));
         $guzzleException = $this->createMock(RequestException::class);
 
         $this->loggerMock->expects($this->once())
