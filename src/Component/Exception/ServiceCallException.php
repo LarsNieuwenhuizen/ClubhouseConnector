@@ -5,6 +5,6 @@ namespace LarsNieuwenhuizen\ClubhouseConnector\Component\Exception;
 
 use Exception;
 
-final class ComponentCreationException extends Exception
+final class ServiceCallException extends Exception
 {
 }
