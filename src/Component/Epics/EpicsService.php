@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace LarsNieuwenhuizen\ClubhouseConnector\Component\Epics;
 
+use Guzzle\Common\Exception\RuntimeException;
 use GuzzleHttp\Exception\GuzzleException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\AbstractComponentService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentCreationException;
@@ -11,6 +12,7 @@ use LarsNieuwenhuizen\ClubhouseConnector\Component\CreateableComponent;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Domain\Model\Epic;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Http\GetEpicResponse;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Http\ListEpicsResponse;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentDeleteException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentUpdateException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ServiceCallException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\UpdateableComponent;
@@ -106,9 +108,25 @@ final class EpicsService extends AbstractComponentService
         )->getBody();
     }
 
-    public function delete(): ComponentResponseBody
+    public function delete(int $epicId): void
     {
-        // TODO: Implement delete() method.
+        try {
+            $this->client->delete($this->getApiPath() . '/' . $epicId);
+        } catch (RuntimeException $guzzleException) {
+            $this->getLogger()->error(
+                'Deleting epic with id: ' . $epicId . ' failed',
+                [
+                    'message' => $guzzleException->getMessage()
+                ]
+            );
+            throw new ComponentDeleteException(
+                'Deleting epic with id: ' . $epicId . ' failed',
+                $guzzleException->getCode(),
+                $guzzleException
+            );
+        }
+
+        return;
     }
 
     /**

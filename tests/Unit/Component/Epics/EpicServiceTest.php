@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace LarsNieuwenhuizen\ClubhouseConnector\Tests\Unit\Component\Epics;
 
+use Guzzle\Common\Exception\RuntimeException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
@@ -13,6 +14,8 @@ use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Domain\Model\Epic;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Domain\Model\EpicCollection;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\EpicsService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentCreationException;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentDeleteException;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentUpdateException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ServiceCallException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -367,5 +370,44 @@ final class EpicServiceTest extends TestCase
 
         $result = $this->subject->update($epic);
         $this->assertInstanceOf(Epic::class, $result);
+    }
+
+    public function testGuzzleCallFailureIsLoggedAndThrownBackDuringUpdate(): void
+    {
+        $epic = Epic::createFromResponseData(\json_decode($this->exampleGetResponse, true));
+        $guzzleException = $this->createMock(RequestException::class);
+
+        $this->loggerMock->expects($this->once())
+            ->method('error');
+
+        $this->clientMock->expects($this->once())
+            ->method('put')
+            ->with('epics/123', ['body' => $epic->toJsonForUpdate()])
+            ->willThrowException($guzzleException);
+
+        $this->expectException(ComponentUpdateException::class);
+        $this->subject->update($epic);
+    }
+
+    public function testVoidReturnedAfterSuccessfulDelete(): void
+    {
+        $result = $this->subject->delete(1);
+        $this->assertNull($result);
+    }
+
+    public function testGuzzleCallFailureIsLoggedAndThrownBackDuringDelete(): void
+    {
+        $guzzleException = $this->createMock(RuntimeException::class);
+
+        $this->loggerMock->expects($this->once())
+            ->method('error');
+
+        $this->clientMock->expects($this->once())
+            ->method('delete')
+            ->with('epics/1')
+            ->willThrowException($guzzleException);
+
+        $this->expectException(ComponentDeleteException::class);
+        $this->subject->delete(1);
     }
 }

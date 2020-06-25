@@ -16,7 +16,7 @@ interface ComponentService
 
     public function create(CreateableComponent $component): ComponentResponseBody;
 
-    public function delete(): ComponentResponseBody;
+    public function delete(int $componentId): void;
 
     public function update(UpdateableComponent $component): ComponentResponseBody;
 }
