@@ -8,6 +8,7 @@ use LarsNieuwenhuizen\ClubhouseConnector\Component\AbstractComponentService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentResponseBody;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\CreateableComponent;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\Http\GetMilestoneResponse;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ServiceCallException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\Http\ListMilestonesResponse;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\UpdateableComponent;
@@ -19,7 +20,21 @@ final class MilestonesService extends AbstractComponentService implements Compon
 
     public function get(string $identifier): ComponentResponseBody
     {
-        // TODO: Implement get() method.
+        try {
+            $path = $this->getApiPath() . '/' . $identifier;
+            $call = $this->getClient()->get($path);
+        } catch (GuzzleException $exception) {
+            $this->logger->error(
+                'Fetching single milestone with id: ' . $identifier . ' failed.',
+                [
+                    'message' => $exception->getMessage()
+                ]
+            );
+            throw new ServiceCallException('Fetching single milestone failed', $exception->getCode(), $exception);
+        }
+        return (
+        new GetMilestoneResponse($call->getBody()->getContents())
+        )->getBody();
     }
 
     public function list(): ComponentResponseBody

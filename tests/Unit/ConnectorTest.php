@@ -49,4 +49,9 @@ class ConnectorTest extends TestCase
     {
         $this->assertInstanceOf(ComponentService::class, $this->subject->getEpicsService());
     }
+
+    public function testMilestoneServiceIsAvailable(): void
+    {
+        $this->assertInstanceOf(ComponentService::class, $this->subject->getMilestonesService());
+    }
 }

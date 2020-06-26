@@ -11,6 +11,7 @@ use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Domain\Model\EpicCollection;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\EpicsService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ServiceCallException;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\Domain\Model\Milestone;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\Domain\Model\MilestoneCollection;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\MilestonesService;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -157,5 +158,39 @@ final class MilestoneServiceTest extends TestCase
 
         $this->expectException(ServiceCallException::class);
         $this->subject->list();
+    }
+
+    public function testGettingReturnsAnMilestone(): void
+    {
+        $this->streamMock->expects($this->once())
+            ->method('getContents')
+            ->willReturn($this->exampleGetResponse);
+
+        $this->responseMock->expects($this->once())
+            ->method('getBody')
+            ->willReturn($this->streamMock);
+
+        $this->clientMock->expects($this->once())
+            ->method('get')
+            ->with('milestones/1')
+            ->willReturnReference($this->responseMock);
+
+        $result = $this->subject->get('1');
+
+        $this->assertInstanceOf(Milestone::class, $result);
+    }
+
+    public function testGuzzleCallFailureIsLoggedAndThrownBackDuringGet(): void
+    {
+        $guzzleException = $this->createMock(RequestException::class);
+        $this->loggerMock->expects($this->once())
+            ->method('error');
+        $this->clientMock->expects($this->once())
+            ->method('get')
+            ->with('milestones/1')
+            ->willThrowException($guzzleException);
+
+        $this->expectException(ServiceCallException::class);
+        $this->subject->get('1');
     }
 }
