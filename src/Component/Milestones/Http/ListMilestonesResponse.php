@@ -4,20 +4,17 @@ declare(strict_types = 1);
 namespace LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\Http;
 
 use LarsNieuwenhuizen\ClubhouseConnector\Component\AbstractResponse;
-use LarsNieuwenhuizen\ClubhouseConnector\Component\Domain\Model\ComponentCollection;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\Domain\Model\Milestone;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Response\ComponentCollectionResponseTrait;
 
 final class ListMilestonesResponse extends AbstractResponse
 {
 
-    protected function formatJsonResult(string $jsonResult): void
+    use ComponentCollectionResponseTrait;
+
+    public function __construct(string $jsonBody)
     {
-        $data = \json_decode($jsonResult, true);
-        $collection = new ComponentCollection();
-        foreach ($data as $milestone) {
-            $milestone = Milestone::createFromResponseData($milestone);
-            $collection->addComponent($milestone);
-        }
-        $this->body = $collection;
+        $this->componentClass = Milestone::class;
+        parent::__construct($jsonBody);
     }
 }
