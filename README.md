@@ -56,10 +56,54 @@ models, so we can use the data in a more specified way and make better use of th
 So for example:
 
 ```php
-$epics = $connector->getEpicsService()->list();
+$epics = $connector->epics()->list();
 
 foreach ($epics as $epic) {
     echo $epic->getName();
     echo $epic->getCreatedAt()->format('d-m-Y');
 }
 ```
+
+## Using the services
+
+There will be services created for all components within Clubhouse and subcomponents (labels, categories, comments etc...)
+
+To use a service you'll access it throught the connector as described above.
+
+### CRUD examples
+
+1. Create an Epic
+
+```php
+$epic = new Epic();
+$epic->setName('My first created Epic')
+    ->setDescription('This is the description for my Epic');
+
+$createdEpic = $connector->epics()->create($epic);
+```
+
+2. Update an existing Epic
+```php
+$existingEpic = $connector->epics()->get(1);
+$existingEpic->setName('A new name for this Epic');
+
+$updatedEpic = $connector->epics()->update($existingEpic);
+```
+
+3. Delete an Epic
+```php
+$connector->epics()->delete(1);
+```
+
+4. List all Epics
+```php
+$collection = $connector->epics()->list();
+```
+
+## Magic methods
+The method and variable names I used in the connector are like `getEpicsService()`
+But to make it a bit more relatable with Clubhouse naming and simply a bit shorter,
+I added magic method calls for the services.
+
+So instead of calling `$connector->getEpicsService()->list()`
+You can also call `$connector->epics()->list()`
