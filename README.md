@@ -103,7 +103,7 @@ $collection = $connector->epics()->list();
 ## PSR Logging
 
 You can add your own logger if you feel the need to catch the logs somewhere :)
-All you need is a logger which interfaces with PSR-3 logger interface.
+All you need is a logger which interfaces with [PSR-3 logger interface](https://www.php-fig.org/psr/psr-3/).
 
 When you have that simply construct the connector with it as such:
 
