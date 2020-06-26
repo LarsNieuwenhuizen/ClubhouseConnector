@@ -4,8 +4,11 @@ declare(strict_types=1);
 namespace LarsNieuwenhuizen\ClubhouseConnector\Tests\Unit;
 
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentService;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\EpicsService;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\MilestonesService;
 use LarsNieuwenhuizen\ClubhouseConnector\Connector;
 use LarsNieuwenhuizen\ClubhouseConnector\Exception\Connector\ConnectorConstructionException;
+use LarsNieuwenhuizen\ClubhouseConnector\Exception\Connector\UndefinedMethodException;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -53,5 +56,17 @@ class ConnectorTest extends TestCase
     public function testMilestoneServiceIsAvailable(): void
     {
         $this->assertInstanceOf(ComponentService::class, $this->subject->getMilestonesService());
+    }
+
+    public function testCorrectMagicMethodReturns(): void
+    {
+        $this->assertInstanceOf(EpicsService::class, $this->subject->epics());
+        $this->assertInstanceOf(MilestonesService::class, $this->subject->milestones());
+    }
+
+    public function testIncorrectMagicMethodThrowsCorrectException(): void
+    {
+        $this->expectException(UndefinedMethodException::class);
+        $this->subject->stones();
     }
 }

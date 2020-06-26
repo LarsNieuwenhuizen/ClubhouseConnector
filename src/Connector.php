@@ -8,10 +8,15 @@ use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\EpicsService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\MilestonesService;
 use LarsNieuwenhuizen\ClubhouseConnector\Exception\Connector\ConnectorConstructionException;
+use LarsNieuwenhuizen\ClubhouseConnector\Exception\Connector\UndefinedMethodException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\Yaml\Yaml;
 
+/**
+ * @method EpicsService epics()
+ * @method MilestonesService milestones()
+ */
 final class Connector
 {
 
@@ -48,6 +53,20 @@ final class Connector
             $this->getLogger()->error($connectorConstructionException->getMessage());
             throw $connectorConstructionException;
         }
+    }
+
+    public function __call($name, $arguments)
+    {
+        $componentServices = [
+            'epics',
+            'milestones'
+        ];
+
+        if (\in_array($name, $componentServices)) {
+            $methodName = 'get' . \ucfirst($name) . 'Service';
+            return $this->$methodName();
+        }
+        throw new UndefinedMethodException();
     }
 
     public function getHttpClient(): Client
