@@ -11,12 +11,15 @@ use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Domain\Model\ComponentCollection;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Domain\Model\Epic;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentCreationException;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentDeleteException;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentUpdateException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ServiceCallException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\Domain\Model\Milestone;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\MilestonesService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
+use RuntimeException;
 
 final class MilestoneServiceTest extends TestCase
 {
@@ -244,5 +247,69 @@ final class MilestoneServiceTest extends TestCase
 
         $this->expectException(ServiceCallException::class);
         $this->subject->create($milestone);
+    }
+
+    public function testMilestoneIsReturnedAfterSuccessfulUpdate(): void
+    {
+        $epic = Milestone::createFromResponseData(\json_decode($this->exampleGetResponse, true))
+            ->setStartedAtOverride(new \DateTime('now'))
+            ->setCompletedAtOverride(new \DateTime('now'))
+            ->setBeforeEpic(1)
+            ->setAfterEpic(2);
+
+        $this->streamMock->expects($this->once())
+            ->method('getContents')
+            ->willReturn($this->exampleGetResponse);
+
+        $this->responseMock->expects($this->once())
+            ->method('getBody')
+            ->willReturn($this->streamMock);
+
+        $this->clientMock->expects($this->once())
+            ->method('put')
+            ->with('milestones/123', ['body' => $epic->toJsonForUpdate()])
+            ->willReturn($this->responseMock);
+
+        $result = $this->subject->update($epic);
+        $this->assertInstanceOf(Milestone::class, $result);
+    }
+
+    public function testGuzzleCallFailureIsLoggedAndThrownBackDuringUpdate(): void
+    {
+        $epic = Milestone::createFromResponseData(\json_decode($this->exampleGetResponse, true));
+        $guzzleException = $this->createMock(RequestException::class);
+
+        $this->loggerMock->expects($this->once())
+            ->method('error');
+
+        $this->clientMock->expects($this->once())
+            ->method('put')
+            ->with('milestones/123', ['body' => $epic->toJsonForUpdate()])
+            ->willThrowException($guzzleException);
+
+        $this->expectException(ComponentUpdateException::class);
+        $this->subject->update($epic);
+    }
+
+    public function testVoidReturnedAfterSuccessfulDelete(): void
+    {
+        $result = $this->subject->delete(1);
+        $this->assertNull($result);
+    }
+
+    public function testGuzzleCallFailureIsLoggedAndThrownBackDuringDelete(): void
+    {
+        $guzzleException = $this->createMock(RuntimeException::class);
+
+        $this->loggerMock->expects($this->once())
+            ->method('error');
+
+        $this->clientMock->expects($this->once())
+            ->method('delete')
+            ->with('milestones/1')
+            ->willThrowException($guzzleException);
+
+        $this->expectException(ComponentDeleteException::class);
+        $this->subject->delete(1);
     }
 }

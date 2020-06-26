@@ -31,6 +31,8 @@ final class Milestone implements ComponentResponseBody, UpdateableComponent, Cre
     private ?DateTime $updatedAt;
     private DateTimeZone $defaultDateTimeZone;
     private string $state = 'to do';
+    private ?int $beforeEpic = null;
+    private ?int $afterEpic = null;
 
     public function __construct()
     {
@@ -117,7 +119,23 @@ final class Milestone implements ComponentResponseBody, UpdateableComponent, Cre
 
     public function toJsonForUpdate(): string
     {
-        // TODO: Implement toJsonForUpdate() method.
+        $data =[
+            'categories' => $this->getCategories(),
+            'completed_at_override' => $this->getCompletedAtOverride(),
+            'description' => $this->getDescription(),
+            'name' => $this->getName(),
+            'started_at_override' => $this->getStartedAtOverride(),
+            'state' => $this->getState()
+        ];
+
+        if ($this->getBeforeEpic() !== null) {
+            $data['before_id'] = $this->getBeforeEpic();
+        }
+        if ($this->getAfterEpic() !== null) {
+            $data['after_id'] = $this->getAfterEpic();
+        }
+
+        return \json_encode($data);
     }
 
     public function getAppUrl(): string
@@ -304,6 +322,28 @@ final class Milestone implements ComponentResponseBody, UpdateableComponent, Cre
     public function setState(string $state): Milestone
     {
         $this->state = $state;
+        return $this;
+    }
+
+    public function getBeforeEpic(): ?int
+    {
+        return $this->beforeEpic;
+    }
+
+    public function setBeforeEpic(?int $beforeEpic): Milestone
+    {
+        $this->beforeEpic = $beforeEpic;
+        return $this;
+    }
+
+    public function getAfterEpic(): ?int
+    {
+        return $this->afterEpic;
+    }
+
+    public function setAfterEpic(?int $afterEpic): Milestone
+    {
+        $this->afterEpic = $afterEpic;
         return $this;
     }
 }
