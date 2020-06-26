@@ -8,6 +8,8 @@ use LarsNieuwenhuizen\ClubhouseConnector\Component\AbstractComponentService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentResponseBody;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\CreateableComponent;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentCreationException;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\Domain\Model\Milestone;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\Http\GetMilestoneResponse;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ServiceCallException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\Http\ListMilestonesResponse;
@@ -56,9 +58,38 @@ final class MilestonesService extends AbstractComponentService implements Compon
         )->getBody();
     }
 
-    public function create(CreateableComponent $component): ComponentResponseBody
+    public function create(CreateableComponent $milestone): ComponentResponseBody
     {
-        // TODO: Implement create() method.
+        if (!$milestone instanceof Milestone) {
+            $message = 'The object you are trying to create of type ' . \get_class($milestone) . ' is not a milestone.';
+            $this->getLogger()->error($message);
+            throw new ComponentCreationException($message);
+        }
+
+        try {
+            $call = $this->getClient()->post(
+                $this->getApiPath(),
+                [
+                    'body' => $milestone->toJsonForCreation()
+                ]
+            );
+        } catch (GuzzleException $guzzleException) {
+            $this->getLogger()->error(
+                'Posting new Milestone to Clubhouse failed',
+                [
+                    'message' => $guzzleException->getMessage()
+                ]
+            );
+            throw new ServiceCallException(
+                'Posting new Milestone to Clubhouse failed',
+                $guzzleException->getCode(),
+                $guzzleException
+            );
+        }
+
+        return (
+            new GetMilestoneResponse($call->getBody()->getContents())
+        )->getBody();
     }
 
     public function delete(int $componentId): void

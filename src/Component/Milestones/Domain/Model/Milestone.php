@@ -98,7 +98,21 @@ final class Milestone implements ComponentResponseBody, UpdateableComponent, Cre
 
     public function toJsonForCreation(): string
     {
-        // TODO: Implement toJsonForCreation() method.
+        $data = [
+            'name' => $this->getName(),
+            'categories' => $this->getCategories(),
+            'description' => $this->getDescription(),
+            'state' => $this->getState()
+        ];
+
+        if ($this->getCompletedAtOverride() instanceof DateTime) {
+            $data['completed_at_override'] = $this->getCompletedAtOverride()->format(Connector::DATE_TIME_FORMAT);
+        }
+        if ($this->getStartedAtOverride() instanceof DateTime) {
+            $data['started_at_override'] = $this->getStartedAtOverride()->format(Connector::DATE_TIME_FORMAT);
+        }
+
+        return \json_encode($data);
     }
 
     public function toJsonForUpdate(): string

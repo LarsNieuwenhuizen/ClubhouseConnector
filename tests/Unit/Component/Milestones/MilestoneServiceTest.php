@@ -9,6 +9,8 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Stream;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Domain\Model\ComponentCollection;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Domain\Model\Epic;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentCreationException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ServiceCallException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\Domain\Model\Milestone;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\MilestonesService;
@@ -190,5 +192,57 @@ final class MilestoneServiceTest extends TestCase
 
         $this->expectException(ServiceCallException::class);
         $this->subject->get('1');
+    }
+
+    public function testOnlyMilestonesCanBeMadeInCreate(): void
+    {
+        $this->expectException(ComponentCreationException::class);
+        $differentCreatableComponentObject = new Epic();
+        $this->loggerMock->expects($this->once())
+            ->method('error');
+
+        $this->subject->create($differentCreatableComponentObject);
+    }
+
+    public function testEpicIsReturnedAfterSuccessfulCreation(): void
+    {
+        $epic = new Milestone();
+        $epic->setName('dummy');
+
+        $this->streamMock->expects($this->once())
+            ->method('getContents')
+            ->willReturn($this->exampleGetResponse);
+
+        $this->responseMock->expects($this->once())
+            ->method('getBody')
+            ->willReturn($this->streamMock);
+
+        $this->clientMock->expects($this->once())
+            ->method('post')
+            ->with('milestones', ['body' => $epic->toJsonForCreation()])
+            ->willReturn($this->responseMock);
+
+        $result = $this->subject->create($epic);
+        $this->assertInstanceOf(Milestone::class, $result);
+    }
+
+    public function testGuzzleCallFailureIsLoggedAndThrownBackDuringCreate(): void
+    {
+        $milestone = (new Milestone())->setName('dummy')
+            ->setCompletedAtOverride(new \DateTime('now'))
+            ->setStartedAtOverride(new \DateTime('now'))
+            ->setUpdatedAt(new \DateTime('now'));
+        $guzzleException = $this->createMock(RequestException::class);
+
+        $this->loggerMock->expects($this->once())
+            ->method('error');
+
+        $this->clientMock->expects($this->once())
+            ->method('post')
+            ->with('milestones', ['body' => $milestone->toJsonForCreation()])
+            ->willThrowException($guzzleException);
+
+        $this->expectException(ServiceCallException::class);
+        $this->subject->create($milestone);
     }
 }
