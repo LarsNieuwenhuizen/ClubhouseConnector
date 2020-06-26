@@ -9,6 +9,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Stream;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentService;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Domain\Model\ComponentCollection;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Domain\Model\Epic;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Domain\Model\EpicCollection;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\EpicsService;
@@ -223,7 +224,7 @@ final class EpicServiceTest extends TestCase
         );
     }
 
-    public function testListingReturnsAnEpicCollection(): void
+    public function testListingReturnsAnCollection(): void
     {
         $this->streamMock->expects($this->once())
             ->method('getContents')
@@ -240,7 +241,7 @@ final class EpicServiceTest extends TestCase
 
         $result = $this->subject->list();
 
-        $this->assertInstanceOf(EpicCollection::class, $result);
+        $this->assertInstanceOf(ComponentCollection::class, $result);
     }
 
     public function testGuzzleCallFailureIsLoggedAndThrownBackDuringListing(): void

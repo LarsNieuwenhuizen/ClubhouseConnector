@@ -8,11 +8,9 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Stream;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentService;
-use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Domain\Model\EpicCollection;
-use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\EpicsService;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Domain\Model\ComponentCollection;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ServiceCallException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\Domain\Model\Milestone;
-use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\Domain\Model\MilestoneCollection;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\MilestonesService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -143,7 +141,7 @@ final class MilestoneServiceTest extends TestCase
 
         $result = $this->subject->list();
 
-        $this->assertInstanceOf(MilestoneCollection::class, $result);
+        $this->assertInstanceOf(ComponentCollection::class, $result);
     }
 
     public function testGuzzleCallFailureIsLoggedAndThrownBackDuringListing(): void
