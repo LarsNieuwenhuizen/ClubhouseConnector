@@ -100,6 +100,18 @@ $connector->epics()->delete(1);
 $collection = $connector->epics()->list();
 ```
 
+## PSR Logging
+
+You can add your own logger if you feel the need to catch the logs somewhere :)
+All you need is a logger which interfaces with PSR-3 logger interface.
+
+When you have that simply construct the connector with it as such:
+
+```php
+$logger = new MyOwnPsrLogger();
+$connector = new Connector('config.yaml', $logger);
+```
+
 ## Magic methods
 The method and variable names I used in the connector are like `getEpicsService()`
 But to make it a bit more relatable with Clubhouse naming and simply a bit shorter,
