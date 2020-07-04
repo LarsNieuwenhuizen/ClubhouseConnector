@@ -77,10 +77,10 @@ abstract class AbstractComponentService implements ComponentService
         )->getBody();
     }
 
-    public function create(CreateableComponent $milestone): ComponentResponseBody
+    public function create(CreateableComponent $component): ComponentResponseBody
     {
-        if (!$milestone instanceof $this->componentClass) {
-            $message = 'The object you are trying to create of type ' . \get_class($milestone) . ' is not a milestone.';
+        if (!$component instanceof $this->componentClass) {
+            $message = 'The object you are trying to create of type ' . \get_class($component) . ' is not a milestone.';
             $this->getLogger()->error($message);
             throw new ComponentCreationException($message);
         }
@@ -89,7 +89,7 @@ abstract class AbstractComponentService implements ComponentService
             $call = $this->getClient()->post(
                 $this->getApiPath(),
                 [
-                    'body' => $milestone->toJsonForCreation()
+                    'body' => $component->toJsonForCreation()
                 ]
             );
         } catch (GuzzleException $guzzleException) {

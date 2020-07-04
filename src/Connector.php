@@ -8,6 +8,7 @@ use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\EpicsService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\MilestonesService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Projects\ProjectsService;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Stories\StoriesService;
 use LarsNieuwenhuizen\ClubhouseConnector\Exception\Connector\ConnectorConstructionException;
 use LarsNieuwenhuizen\ClubhouseConnector\Exception\Connector\UndefinedMethodException;
 use Psr\Log\LoggerInterface;
@@ -17,6 +18,7 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * @method EpicsService epics()
  * @method MilestonesService milestones()
+ * @method StoriesService stories()
  * @method ProjectsService projects()
  */
 final class Connector
@@ -29,6 +31,7 @@ final class Connector
     private ComponentService $epicsService;
     private ComponentService $milestonesService;
     private ComponentService $projectsService;
+    private ComponentService $storiesService;
     private LoggerInterface $logger;
 
     public function __construct(string $configurationFilePath, LoggerInterface $logger = null)
@@ -53,6 +56,7 @@ final class Connector
             $this->epicsService = new EpicsService($this->getHttpClient(), $this->getLogger());
             $this->milestonesService = new MilestonesService($this->getHttpClient(), $this->getLogger());
             $this->projectsService = new ProjectsService($this->getHttpClient(), $this->getLogger());
+            $this->storiesService = new StoriesService($this->getHttpClient(), $this->getLogger());
         } catch (ConnectorConstructionException $connectorConstructionException) {
             $this->getLogger()->error($connectorConstructionException->getMessage());
             throw $connectorConstructionException;
@@ -64,6 +68,7 @@ final class Connector
         $componentServices = [
             'epics',
             'projects',
+            'stories',
             'milestones'
         ];
 
@@ -126,8 +131,13 @@ final class Connector
         return $this->milestonesService;
     }
 
-    public function getProjectsService()
+    public function getProjectsService(): ComponentService
     {
         return $this->projectsService;
+    }
+
+    public function getStoriesService(): ComponentService
+    {
+        return $this->storiesService;
     }
 }

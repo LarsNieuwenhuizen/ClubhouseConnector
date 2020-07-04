@@ -7,6 +7,7 @@ use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\EpicsService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Milestones\MilestonesService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Projects\ProjectsService;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Stories\StoriesService;
 use LarsNieuwenhuizen\ClubhouseConnector\Connector;
 use LarsNieuwenhuizen\ClubhouseConnector\Exception\Connector\ConnectorConstructionException;
 use LarsNieuwenhuizen\ClubhouseConnector\Exception\Connector\UndefinedMethodException;
@@ -64,6 +65,7 @@ class ConnectorTest extends TestCase
         $this->assertInstanceOf(EpicsService::class, $this->subject->epics());
         $this->assertInstanceOf(MilestonesService::class, $this->subject->milestones());
         $this->assertInstanceOf(ProjectsService::class, $this->subject->projects());
+        $this->assertInstanceOf(StoriesService::class, $this->subject->stories());
     }
 
     public function testIncorrectMagicMethodThrowsCorrectException(): void
