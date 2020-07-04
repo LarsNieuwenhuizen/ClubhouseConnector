@@ -193,6 +193,22 @@ final class ProjectsServiceTest extends TestCase
     {
         $project = new Project();
         $project->setName('dummy')
+            ->setDescription('Test')
+            ->setUpdatedAt(new \DateTime('now'))
+            ->setCreatedAt(new \DateTime('now'))
+            ->setArchived(false)
+            ->setEntityType('normal')
+            ->setId(1)
+            ->setShowThermometer(false)
+            ->setStats([])
+            ->setAppUrl('app')
+            ->setColor('blue')
+            ->setIterationLength(2)
+            ->setExternalId('123')
+            ->setAbbreviation('dum')
+            ->setDaysToThermometer(2)
+            ->setFollowerIds([])
+            ->setStartTime(new \DateTime('now'))
             ->setTeamId(1);
 
         $this->streamMock->expects($this->once())
@@ -209,12 +225,14 @@ final class ProjectsServiceTest extends TestCase
             ->willReturn($this->responseMock);
 
         $result = $this->subject->create($project);
+        $this->assertIsArray($result->getStats());
+        $this->assertIsString($result->getEntityType());
         $this->assertInstanceOf(Project::class, $result);
     }
 
     public function testGuzzleCallFailureIsLoggedAndThrownBackDuringCreate(): void
     {
-        $milestone = (new Project())->setName('dummy')
+        $project = (new Project())->setName('dummy')
             ->setUpdatedAt(new \DateTime('now'));
         $guzzleException = $this->createMock(RequestException::class);
 
@@ -223,11 +241,11 @@ final class ProjectsServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('post')
-            ->with('projects', ['body' => $milestone->toJsonForCreation()])
+            ->with('projects', ['body' => $project->toJsonForCreation()])
             ->willThrowException($guzzleException);
 
         $this->expectException(ServiceCallException::class);
-        $this->subject->create($milestone);
+        $this->subject->create($project);
     }
 
     public function testProjectIsReturnedAfterSuccessfulUpdate(): void
