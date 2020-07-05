@@ -14,9 +14,9 @@ trait ComponentCollectionResponseTrait
     {
         $data = \json_decode($jsonResult, true);
         $collection = new ComponentCollection();
-        foreach ($data as $milestone) {
-            $milestone = $this->componentClass::createFromResponseData($milestone);
-            $collection->addComponent($milestone);
+        foreach ($data as $component) {
+            $component = $this->componentClass::createFromResponseData($component);
+            $collection->addComponent($component);
         }
         $this->body = $collection;
     }

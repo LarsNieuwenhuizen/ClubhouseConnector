@@ -9,6 +9,7 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Stream;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Domain\Model\ComponentCollection;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Domain\Model\StoryCollection;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Epics\Domain\Model\Epic;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\MethodDoesNotExistException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Stories\Domain\Model\Story;
@@ -28,6 +29,7 @@ final class StoriesServiceTest extends TestCase
     private StoriesService $subject;
 
     private string $exampleGetResponse;
+    private string $exampleListResponse;
     private MockObject $clientMock;
     private MockObject $loggerMock;
     private MockObject $responseMock;
@@ -261,6 +263,7 @@ final class StoriesServiceTest extends TestCase
           "updated_at": "2016-12-31T12:30:00Z",
           "workflow_state_id": 123
         }';
+        $this->exampleListResponse = '[' . $this->exampleGetResponse . ']';
         parent::setUp();
     }
 
@@ -386,6 +389,54 @@ final class StoriesServiceTest extends TestCase
 
         $this->expectException(ServiceCallException::class);
         $this->subject->create($story);
+    }
+
+    public function testStoryListIsReturnedAfterSuccessfulBulkCreation(): void
+    {
+        $story = new Story();
+        $story->setName('dummy')
+            ->setProjectId(1);
+
+        $storyCollection = new StoryCollection();
+        $storyCollection->addComponent($story);
+
+        $this->streamMock->expects($this->once())
+            ->method('getContents')
+            ->willReturn($this->exampleListResponse);
+
+        $this->responseMock->expects($this->once())
+            ->method('getBody')
+            ->willReturn($this->streamMock);
+
+        $this->clientMock->expects($this->once())
+            ->method('post')
+            ->with('stories/bulk', ['json' => $storyCollection->toArrayForBulkCreation()])
+            ->willReturn($this->responseMock);
+
+        $result = $this->subject->createBulk($storyCollection);
+        $this->assertInstanceOf(ComponentCollection::class, $result);
+    }
+
+    public function testGuzzleCallFailureIsLoggedAndThrownBackDuringBulkCreate(): void
+    {
+        $story = (new Story())->setName('dummy')
+            ->setProjectId(1);
+
+        $storyCollection = new StoryCollection();
+        $storyCollection->addComponent($story);
+
+        $guzzleException = $this->createMock(RequestException::class);
+
+        $this->loggerMock->expects($this->once())
+            ->method('error');
+
+        $this->clientMock->expects($this->once())
+            ->method('post')
+            ->with('stories/bulk', ['json' => $storyCollection->toArrayForBulkCreation()])
+            ->willThrowException($guzzleException);
+
+        $this->expectException(ServiceCallException::class);
+        $this->subject->createBulk($storyCollection);
     }
 
     public function testStoryIsReturnedAfterSuccessfulUpdate(): void

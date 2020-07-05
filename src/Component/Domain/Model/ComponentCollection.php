@@ -9,7 +9,7 @@ use IteratorAggregate;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentResponseBody;
 use Traversable;
 
-final class ComponentCollection implements IteratorAggregate, ComponentResponseBody, Countable
+class ComponentCollection implements IteratorAggregate, ComponentResponseBody, Countable
 {
 
     private ArrayObject $components;

@@ -11,7 +11,7 @@ trait SingleComponentResponseTrait
     protected function formatJsonResult(string $json): void
     {
         $data = \json_decode($json, true);
-        $milestone = $this->componentClass::createFromResponseData($data);
-        $this->body = $milestone;
+        $component = $this->componentClass::createFromResponseData($data);
+        $this->body = $component;
     }
 }
