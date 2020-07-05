@@ -144,7 +144,7 @@ final class Story implements ComponentResponseBody, UpdateableComponent, Createa
         return $object;
     }
 
-    public function toJsonForCreation(): string
+    public function toArrayForCreation(): array
     {
         $data = [
             'archived' => $this->getArchived(),
@@ -182,7 +182,7 @@ final class Story implements ComponentResponseBody, UpdateableComponent, Createa
         if ($this->getUpdatedAt() !== null) {
             $data['updated_at'] = $this->getUpdatedAt()->format(Connector::DATE_TIME_FORMAT);
         }
-        return \json_encode($data);
+        return $data;
     }
 
     /**
@@ -190,7 +190,7 @@ final class Story implements ComponentResponseBody, UpdateableComponent, Createa
      * @todo Implement commit_ids
      * @todo Implement pull_request_ids
      */
-    public function toJsonForUpdate(): string
+    public function toArrayForUpdate(): array
     {
         $data = [
             'archived' => $this->getArchived(),
@@ -224,7 +224,7 @@ final class Story implements ComponentResponseBody, UpdateableComponent, Createa
             $data['workflow_state_id'] = $this->getWorkflowStateId();
         }
 
-        return \json_encode($data);
+        return $data;
     }
 
     public function getArchived(): bool

@@ -222,7 +222,7 @@ final class MilestoneServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('post')
-            ->with('milestones', ['body' => $epic->toJsonForCreation()])
+            ->with('milestones', ['json' => $epic->toArrayForCreation()])
             ->willReturn($this->responseMock);
 
         $result = $this->subject->create($epic);
@@ -242,7 +242,7 @@ final class MilestoneServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('post')
-            ->with('milestones', ['body' => $milestone->toJsonForCreation()])
+            ->with('milestones', ['json' => $milestone->toArrayForCreation()])
             ->willThrowException($guzzleException);
 
         $this->expectException(ServiceCallException::class);
@@ -267,7 +267,7 @@ final class MilestoneServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('put')
-            ->with('milestones/123', ['body' => $epic->toJsonForUpdate()])
+            ->with('milestones/123', ['json' => $epic->toArrayForUpdate()])
             ->willReturn($this->responseMock);
 
         $result = $this->subject->update($epic);
@@ -284,7 +284,7 @@ final class MilestoneServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('put')
-            ->with('milestones/123', ['body' => $epic->toJsonForUpdate()])
+            ->with('milestones/123', ['json' => $epic->toArrayForUpdate()])
             ->willThrowException($guzzleException);
 
         $this->expectException(ComponentUpdateException::class);

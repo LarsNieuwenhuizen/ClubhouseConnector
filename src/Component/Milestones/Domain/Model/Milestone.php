@@ -98,7 +98,7 @@ final class Milestone implements ComponentResponseBody, UpdateableComponent, Cre
         return $object;
     }
 
-    public function toJsonForCreation(): string
+    public function toArrayForCreation(): array
     {
         $data = [
             'name' => $this->getName(),
@@ -114,10 +114,10 @@ final class Milestone implements ComponentResponseBody, UpdateableComponent, Cre
             $data['started_at_override'] = $this->getStartedAtOverride()->format(Connector::DATE_TIME_FORMAT);
         }
 
-        return \json_encode($data);
+        return $data;
     }
 
-    public function toJsonForUpdate(): string
+    public function toArrayForUpdate(): array
     {
         $data =[
             'categories' => $this->getCategories(),
@@ -135,7 +135,7 @@ final class Milestone implements ComponentResponseBody, UpdateableComponent, Cre
             $data['after_id'] = $this->getAfterEpic();
         }
 
-        return \json_encode($data);
+        return $data;
     }
 
     public function getAppUrl(): string

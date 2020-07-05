@@ -6,5 +6,5 @@ namespace LarsNieuwenhuizen\ClubhouseConnector\Component;
 interface CreateableComponent
 {
 
-    public function toJsonForCreation(): string;
+    public function toArrayForCreation(): array;
 }

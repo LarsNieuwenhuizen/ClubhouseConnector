@@ -136,7 +136,7 @@ final class Epic implements ComponentResponseBody, CreateableComponent, Updateab
         return $object;
     }
 
-    public function toJsonForCreation(): string
+    public function toArrayForCreation(): array
     {
         $data = [
             'name' => $this->getName(),
@@ -175,10 +175,10 @@ final class Epic implements ComponentResponseBody, CreateableComponent, Updateab
             $data['state'] = $this->getState();
         }
 
-        return \json_encode($data);
+        return $data;
     }
 
-    public function toJsonForUpdate(): string
+    public function toArrayForUpdate(): array
     {
         $data = [
             'name' => $this->getName(),
@@ -222,7 +222,7 @@ final class Epic implements ComponentResponseBody, CreateableComponent, Updateab
             $data['started_at_override'] = $this->getStartedAtOverride()->format(Connector::DATE_TIME_FORMAT);
         }
 
-        return \json_encode($data);
+        return $data;
     }
 
     public function getBeforeEpic(): ?int

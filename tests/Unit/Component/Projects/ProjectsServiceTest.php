@@ -221,7 +221,7 @@ final class ProjectsServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('post')
-            ->with('projects', ['body' => $project->toJsonForCreation()])
+            ->with('projects', ['json' => $project->toArrayForCreation()])
             ->willReturn($this->responseMock);
 
         $result = $this->subject->create($project);
@@ -241,7 +241,7 @@ final class ProjectsServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('post')
-            ->with('projects', ['body' => $project->toJsonForCreation()])
+            ->with('projects', ['json' => $project->toArrayForCreation()])
             ->willThrowException($guzzleException);
 
         $this->expectException(ServiceCallException::class);
@@ -261,7 +261,7 @@ final class ProjectsServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('put')
-            ->with('projects/123', ['body' => $project->toJsonForUpdate()])
+            ->with('projects/123', ['json' => $project->toArrayForUpdate()])
             ->willReturn($this->responseMock);
 
         $result = $this->subject->update($project);
@@ -278,7 +278,7 @@ final class ProjectsServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('put')
-            ->with('projects/123', ['body' => $project->toJsonForUpdate()])
+            ->with('projects/123', ['json' => $project->toArrayForUpdate()])
             ->willThrowException($guzzleException);
 
         $this->expectException(ComponentUpdateException::class);

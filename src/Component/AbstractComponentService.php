@@ -89,7 +89,7 @@ abstract class AbstractComponentService implements ComponentService
             $call = $this->getClient()->post(
                 $this->getApiPath(),
                 [
-                    'body' => $component->toJsonForCreation()
+                    'json' => $component->toArrayForCreation()
                 ]
             );
         } catch (GuzzleException $guzzleException) {
@@ -124,7 +124,7 @@ abstract class AbstractComponentService implements ComponentService
             $call = $this->getClient()->put(
                 $this->getApiPath() . '/' . $component->getId(),
                 [
-                    'body' => $component->toJsonForUpdate()
+                    'json' => $component->toArrayForUpdate()
                 ]
             );
         } catch (GuzzleException $guzzleException) {

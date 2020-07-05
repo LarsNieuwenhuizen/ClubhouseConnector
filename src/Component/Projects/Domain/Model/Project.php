@@ -83,7 +83,7 @@ final class Project implements ComponentResponseBody, UpdateableComponent, Creat
         return $object;
     }
 
-    public function toJsonForCreation(): string
+    public function toArrayForCreation(): array
     {
         $data = [
             'name' => $this->getName(),
@@ -106,10 +106,10 @@ final class Project implements ComponentResponseBody, UpdateableComponent, Creat
             $data['updated_at'] = $this->getUpdatedAt()->format(Connector::DATE_TIME_FORMAT);
         }
 
-        return \json_encode($data);
+        return $data;
     }
 
-    public function toJsonForUpdate(): string
+    public function toArrayForUpdate(): array
     {
         $data = [
             'name' => $this->getName(),
@@ -128,7 +128,7 @@ final class Project implements ComponentResponseBody, UpdateableComponent, Creat
             $data['days_to_thermometer'] = $this->getDaysToThermometer();
         }
 
-        return \json_encode($data);
+        return $data;
     }
 
     public function getAbbreviation(): string

@@ -327,7 +327,7 @@ final class EpicServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('post')
-            ->with('epics', ['body' => $epic->toJsonForCreation()])
+            ->with('epics', ['json' => $epic->toArrayForCreation()])
             ->willReturn($this->responseMock);
 
         $result = $this->subject->create($epic);
@@ -349,7 +349,7 @@ final class EpicServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('post')
-            ->with('epics', ['body' => $epic->toJsonForCreation()])
+            ->with('epics', ['json' => $epic->toArrayForCreation()])
             ->willThrowException($guzzleException);
 
         $this->expectException(ServiceCallException::class);
@@ -376,7 +376,7 @@ final class EpicServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('put')
-            ->with('epics/123', ['body' => $epic->toJsonForUpdate()])
+            ->with('epics/123', ['json' => $epic->toArrayForUpdate()])
             ->willReturn($this->responseMock);
 
         $result = $this->subject->update($epic);
@@ -393,7 +393,7 @@ final class EpicServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('put')
-            ->with('epics/123', ['body' => $epic->toJsonForUpdate()])
+            ->with('epics/123', ['json' => $epic->toArrayForUpdate()])
             ->willThrowException($guzzleException);
 
         $this->expectException(ComponentUpdateException::class);

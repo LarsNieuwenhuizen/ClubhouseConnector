@@ -363,7 +363,7 @@ final class StoriesServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('post')
-            ->with('stories', ['body' => $story->toJsonForCreation()])
+            ->with('stories', ['json' => $story->toArrayForCreation()])
             ->willReturn($this->responseMock);
 
         $result = $this->subject->create($story);
@@ -381,7 +381,7 @@ final class StoriesServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('post')
-            ->with('stories', ['body' => $story->toJsonForCreation()])
+            ->with('stories', ['json' => $story->toArrayForCreation()])
             ->willThrowException($guzzleException);
 
         $this->expectException(ServiceCallException::class);
@@ -405,7 +405,7 @@ final class StoriesServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('put')
-            ->with('stories/123', ['body' => $story->toJsonForUpdate()])
+            ->with('stories/123', ['json' => $story->toArrayForUpdate()])
             ->willReturn($this->responseMock);
 
         $result = $this->subject->update($story);
@@ -422,7 +422,7 @@ final class StoriesServiceTest extends TestCase
 
         $this->clientMock->expects($this->once())
             ->method('put')
-            ->with('stories/123', ['body' => $story->toJsonForUpdate()])
+            ->with('stories/123', ['json' => $story->toArrayForUpdate()])
             ->willThrowException($guzzleException);
 
         $this->expectException(ComponentUpdateException::class);
