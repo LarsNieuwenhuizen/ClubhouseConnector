@@ -7,6 +7,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\AbstractComponentService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentResponseBody;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Domain\Model\StoryCollection;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentUpdateException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\MethodDoesNotExistException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ServiceCallException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Stories\Domain\Model\Story;
@@ -54,6 +55,35 @@ final class StoriesService extends AbstractComponentService
             );
         }
 
+        return (
+            new $this->listResponseClass($call->getBody()->getContents())
+        )->getBody();
+    }
+
+    public function updateBulk(array $storyIds, Story $story): ComponentResponseBody
+    {
+        try {
+            $data = $story->toArrayForBulkUpdate();
+            $data['story_ids'] = $storyIds;
+            $call = $this->getClient()->put(
+                $this->getApiPath() . '/bulk',
+                [
+                    'json' => $data
+                ]
+            );
+        } catch (GuzzleException $guzzleException) {
+            $this->getLogger()->error(
+                'Updating bulk of stories failed',
+                [
+                    'message' => $guzzleException->getMessage()
+                ]
+            );
+            throw new ComponentUpdateException(
+                'Updating bulk of stories failed',
+                $guzzleException->getCode(),
+                $guzzleException
+            );
+        }
         return (
             new $this->listResponseClass($call->getBody()->getContents())
         )->getBody();

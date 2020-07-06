@@ -55,7 +55,7 @@ final class Story implements ComponentResponseBody, UpdateableComponent, Createa
     private array $ownerIds = [];
     private ?int $position = null;
     private array $previousIterationIds = [];
-    private int $projectId;
+    private ?int $projectId = null;
     private array $pullRequests = [];
     private ?string $requestedById = null;
     private bool $started = false;
@@ -224,6 +224,45 @@ final class Story implements ComponentResponseBody, UpdateableComponent, Createa
             $data['workflow_state_id'] = $this->getWorkflowStateId();
         }
 
+        return $data;
+    }
+
+    /**
+     * @todo implement:
+     *  - follower_ids_add
+     *  - follower_ids_remove
+     *  - labels_add
+     *  - labels_remove
+     *  - owner_ids_add
+     *  - owner_ids_remove
+     */
+    public function toArrayForBulkUpdate()
+    {
+        $data = [
+            'archived' => $this->getArchived(),
+            'epic_id' => $this->getEpicId(),
+            'estimate' => $this->getEstimate(),
+            'iteration_id' => $this->getIterationId(),
+            'story_type' => $this->getStoryType()
+        ];
+        if ($this->getProjectId() !== null) {
+            $data['project_id'] = $this->getProjectId();
+        }
+        if ($this->getAfterStory() !== null) {
+            $data['after_id'] = $this->getAfterStory();
+        }
+        if ($this->getBeforeStory() !== null) {
+            $data['before_id'] = $this->getBeforeStory();
+        }
+        if ($this->getDeadline() !== null) {
+            $data['deadline'] = $this->getDeadline()->format(Connector::DATE_TIME_FORMAT);
+        }
+        if ($this->getRequestedById() !== null) {
+            $data['requested_by_id'] = $this->getRequestedById();
+        }
+        if ($this->getWorkflowStateId() !== null) {
+            $data['workflow_state_id'] = $this->getWorkflowStateId();
+        }
         return $data;
     }
 
@@ -612,12 +651,12 @@ final class Story implements ComponentResponseBody, UpdateableComponent, Createa
         return $this;
     }
 
-    public function getProjectId(): int
+    public function getProjectId(): ?int
     {
         return $this->projectId;
     }
 
-    public function setProjectId(int $projectId): Story
+    public function setProjectId(int $projectId = null): Story
     {
         $this->projectId = $projectId;
         return $this;

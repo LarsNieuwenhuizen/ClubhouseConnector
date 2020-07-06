@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace LarsNieuwenhuizen\ClubhouseConnector\Tests\Unit\Component\Stories;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Stream;
@@ -17,6 +18,7 @@ use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentCreationEx
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentDeleteException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentUpdateException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ServiceCallException;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Stories\Http\ListStoriesResponse;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Stories\StoriesService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -500,5 +502,52 @@ final class StoriesServiceTest extends TestCase
 
         $this->expectException(ComponentDeleteException::class);
         $this->subject->delete(1);
+    }
+
+    public function testListIsReturnedAfterSuccessfulBulkUpdate(): void
+    {
+        $story = new Story();
+        $story->setAfterStory(2)
+            ->setBeforeStory(4)
+            ->setArchived(true);
+
+        $data = \array_merge(['story_ids' => [1, 2]], $story->toArrayForBulkUpdate());
+
+        $this->streamMock->expects($this->once())
+            ->method('getContents')
+            ->willReturn($this->exampleListResponse);
+
+        $this->responseMock->expects($this->once())
+            ->method('getBody')
+            ->willReturn($this->streamMock);
+
+        $this->clientMock->expects($this->once())
+            ->method('put')
+            ->with('stories/bulk', ['json' => $data])
+            ->willReturn($this->responseMock);
+
+        $result = $this->subject->updateBulk([1, 2], $story);
+        $this->assertInstanceOf(ComponentCollection::class, $result);
+    }
+
+    public function testGuzzleCallFailureIsLoggedAndThrownBackDuringBulkUpdate(): void
+    {
+        $story = new Story();
+        $story->setAfterStory(2)
+            ->setBeforeStory(4)
+            ->setArchived(true);
+        $data = \array_merge(['story_ids' => [1, 2]], $story->toArrayForBulkUpdate());
+        $guzzleException = $this->createMock(RequestException::class);
+        $this->loggerMock->expects($this->once())
+            ->method('error');
+        $this->clientMock->expects($this->once())
+            ->method('put')
+            ->with('stories/bulk', ['json' => $data])
+            ->willThrowException($guzzleException);
+
+        $this->expectException(ComponentUpdateException::class);
+        $this->expectExceptionMessage('Updating bulk of stories failed');
+
+        $this->subject->updateBulk([1, 2], $story);
     }
 }
