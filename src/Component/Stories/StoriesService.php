@@ -7,12 +7,14 @@ use GuzzleHttp\Exception\GuzzleException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\AbstractComponentService;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\ComponentResponseBody;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Domain\Model\StoryCollection;
+use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentDeleteException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ComponentUpdateException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\MethodDoesNotExistException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Exception\ServiceCallException;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Stories\Domain\Model\Story;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Stories\Http\GetStoryResponse;
 use LarsNieuwenhuizen\ClubhouseConnector\Component\Stories\Http\ListStoriesResponse;
+use RuntimeException;
 
 final class StoriesService extends AbstractComponentService
 {
@@ -87,5 +89,31 @@ final class StoriesService extends AbstractComponentService
         return (
             new $this->listResponseClass($call->getBody()->getContents())
         )->getBody();
+    }
+
+    public function deleteBulk(array $storyIds): void
+    {
+        try {
+            $this->client->delete(
+                'stories/bulk',
+                [
+                    'json' => [
+                        'story_ids' => $storyIds
+                    ]
+                ]
+            );
+        } catch (RuntimeException $guzzleException) {
+            $this->getLogger()->error(
+                'Bulk deleting stories with ID\'s: ' . \implode(', ', $storyIds) . ' failed',
+                [
+                    'message' => $guzzleException->getMessage()
+                ]
+            );
+            throw new ComponentDeleteException(
+                'Bulk deleting stories with ID\'s: ' . \implode(', ', $storyIds) . ' failed',
+                $guzzleException->getCode(),
+                $guzzleException
+            );
+        }
     }
 }

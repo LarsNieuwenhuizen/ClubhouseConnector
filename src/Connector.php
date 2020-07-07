@@ -110,7 +110,7 @@ final class Connector
         return $this;
     }
 
-    public function getLogger()
+    public function getLogger(): LoggerInterface
     {
         return $this->logger;
     }

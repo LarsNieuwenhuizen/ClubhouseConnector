@@ -550,4 +550,26 @@ final class StoriesServiceTest extends TestCase
 
         $this->subject->updateBulk([1, 2], $story);
     }
+
+    public function testNullIsReturnedAfterSuccessfulBulkDelete(): void
+    {
+        $result = $this->subject->deleteBulk([1, 2]);
+        $this->assertNull($result);
+    }
+
+    public function testGuzzleCallFailureIsLoggedAndThrownBackDuringBulkDelete(): void
+    {
+        $guzzleException = $this->createMock(RuntimeException::class);
+
+        $this->loggerMock->expects($this->once())
+            ->method('error');
+
+        $this->clientMock->expects($this->once())
+            ->method('delete')
+            ->with('stories/bulk', ['json' => ['story_ids' => [1, 2]]])
+            ->willThrowException($guzzleException);
+
+        $this->expectException(ComponentDeleteException::class);
+        $this->subject->deleteBulk([1, 2]);
+    }
 }
