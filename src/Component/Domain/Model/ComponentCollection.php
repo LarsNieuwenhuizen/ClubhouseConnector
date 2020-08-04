@@ -19,9 +19,10 @@ class ComponentCollection implements IteratorAggregate, ComponentResponseBody, C
         $this->components = new ArrayObject();
     }
 
-    public function addComponent(ComponentResponseBody $component): void
+    public function addComponent(ComponentResponseBody $component): self
     {
         $this->components->append($component);
+        return $this;
     }
 
     public function getIterator(): Traversable

@@ -10,11 +10,11 @@ use LarsNieuwenhuizen\ClubhouseConnector\Component\Stories\Domain\Model\Story;
 final class StoryCollection extends ComponentCollection implements BulkCreateableComponentCollection
 {
 
-    public function addComponent(ComponentResponseBody $component): void
+    public function addComponent(ComponentResponseBody $component): self
     {
         if ($component instanceof Story) {
             parent::addComponent($component);
-            return;
+            return $this;
         }
         throw new \DomainException('Only stories can be added in this collection');
     }
