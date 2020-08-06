@@ -23,7 +23,7 @@
         "php": ">=7.4",
         "ext-json": "*",
         "guzzlehttp/guzzle": "^6.5",
-        "symfony/yaml": "^4",
+        "symfony/yaml": "*",
         "psr/log": "^1.1"
     },
     "require-dev": {
