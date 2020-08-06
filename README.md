@@ -7,14 +7,6 @@
 This library allows you to easily make use of
 the Clubhouse api integrations through one connector.
 
-## Early development stage | June 2020
-This library is created recently and in a very early development stage.
-So it will be subject to change a lot at this point in time.
-
-You can test it if you want, but do not expect too much yet ;)
-
-I will create more documentation when the base functionality is set. 
-
 ## Single point of entry
 All you need to do is construct the Connector object with a configuration file.
 The configuration is done throught yaml and looks like this.
@@ -98,6 +90,21 @@ $connector->epics()->delete(1);
 4. List all Epics
 ```php
 $collection = $connector->epics()->list();
+```
+
+
+## Currently usable resources
+
+  - Epics
+  - Milestones
+  - Projects
+  - Stories
+  
+```php
+$connector->epics()
+$connector->milestones()
+$connector->projects()
+$connector->stories()
 ```
 
 ## PSR Logging
